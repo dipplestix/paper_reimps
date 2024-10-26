@@ -1,0 +1,9 @@
+cv/data/cifar-10-batches-py/data_batch_1
+cv/data/cifar-10-batches-py/data_batch_2
+cv/data/cifar-10-batches-py/data_batch_3
+cv/data/cifar-10-batches-py/data_batch_4
+cv/data/cifar-10-batches-py/data_batch_5
+*.tar.gz
+*.pycache__
+*.pyc
+*.log
