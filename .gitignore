@@ -4,3 +4,4 @@ cv/data/*
 *.pyc
 *.log
 */wandb/*
+*/signatures/*
