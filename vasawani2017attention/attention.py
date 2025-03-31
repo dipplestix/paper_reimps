@@ -38,7 +38,6 @@ class Attention(nn.Module):
                  causal: bool = True,
                  use_rotary: bool = False,
                  rope_theta: float = 10000.0,
-                #  max_seq_length: int = 2048,
                  ):
 
         super().__init__()
