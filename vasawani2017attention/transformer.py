@@ -23,7 +23,8 @@ class TransformerBlock(nn.Module):
                  glu_dim_multiplier: int = 2, 
                  dropout_p: float = 0.0,
                  use_qk_norm: bool = False,
-                 use_rotary: bool = True):
+                 use_rotary: bool = True,
+                 use_glu: bool = True):
         super().__init__()
         self.ln1 = nn.LayerNorm(hidden_size)
         self.attn = Attention(n_heads, 
@@ -33,9 +34,17 @@ class TransformerBlock(nn.Module):
                               use_rotary=use_rotary)
         self.ln2 = nn.LayerNorm(hidden_size)
         
-        # Directly calculate intermediate dimension
-        intermediate_dim = hidden_size * glu_dim_multiplier
-        self.glu = GLU(hidden_size, intermediate_dim, hidden_size, dropout_p=dropout_p)
+        if use_glu:
+            # Directly calculate intermediate dimension
+            intermediate_dim = hidden_size * glu_dim_multiplier
+            self.ffn = GLU(hidden_size, intermediate_dim, hidden_size, dropout_p=dropout_p)
+        else:
+            self.ffn = nn.Sequential(
+                nn.Linear(hidden_size, hidden_size*4, bias=True),
+                nn.SiLU(),
+                nn.Linear(hidden_size*4, hidden_size, bias=True),
+                nn.Dropout(dropout_p)
+            )
     
     def forward(self, x, attention_mask=None, position_ids=None):
         """
@@ -55,7 +64,7 @@ class TransformerBlock(nn.Module):
                           attention_mask=attention_mask, 
                           position_ids=position_ids)
         norm_x = self.ln2(x)
-        x = x + self.glu(norm_x)
+        x = x + self.ffn(norm_x)
         return x
 
 class Transformer(nn.Module):
@@ -100,6 +109,7 @@ class Transformer(nn.Module):
             for _ in range(n_layers)
         ])
         self.ln = nn.LayerNorm(hidden_size) 
+        self.out = nn.Linear(hidden_size, vocab_size)
 
     def forward(self, x, attention_mask=None, position_ids=None):
         """
@@ -133,5 +143,6 @@ class Transformer(nn.Module):
             
         # Final layer norm
         x = self.ln(x)
-        return x
+        out = self.out(x)
+        return out
 
