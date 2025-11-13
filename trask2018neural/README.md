@@ -18,8 +18,20 @@ Running the script produces a figure at
 reported in the paper: the training loss falls close to zero, but the predictions
 outside the training range collapse toward a constant value.
 
+For an interactive exploration open `identity_failure.ipynb`.  The notebook trains
+standard MLPs, residual MLPs, and a stack of Neural Accumulator (NAC) layers across a
+suite of activation functions (ReLU, ReLU6, Softplus, Tanh, Sigmoid, ELU, SiLU,
+Identity, and PReLU) and visualises all models on a single log-scaled error plot.  This
+plot makes it easy to see the subtle differences between activations that keep the error
+extremely low while highlighting the dramatic failures of others.
+
 ## Configuration
 
 The experiment parameters are collected in `ExperimentConfig` within
 `identity_failure.py`.  You can modify the training range, depth, width, or number of
 training points to explore how these choices affect the extrapolation performance.
+
+The NAC and Neural Arithmetic Logic Unit (NALU) implementations used in both the script
+and the notebook reside in `nac.py`.  They expose a `reset_parameters()` helper that
+keeps the constrained weight matrix close to the additive regime recommended by the
+original authors.
